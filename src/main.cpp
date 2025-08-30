@@ -6,7 +6,9 @@
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
-#include <glm/glm.hpp>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image/stb_image.h>
 
 float triangleData[] = {
     //positions
@@ -216,67 +218,79 @@ int main() {
 
     enableReportGlErrors();
 
-#pragma region imgui
+    #pragma region imgui
 
-    ImGui::CreateContext();
-    ImGui_ImplGlfw_InitForOpenGL(window, true);
-    ImGui_ImplOpenGL3_Init("#version 330");
+        ImGui::CreateContext();
+        ImGui_ImplGlfw_InitForOpenGL(window, true);
+        ImGui_ImplOpenGL3_Init("#version 330");
 
-#pragma endregion
+    #pragma endregion
 
-#pragma region vao
+    #pragma region vao
 
-    GLuint vao = 0;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
+        GLuint vao = 0;
+        glGenVertexArrays(1, &vao);
+        glBindVertexArray(vao);
 
-#pragma endregion
+    #pragma endregion
 
-#pragma region buffer
+    #pragma region buffer
 
-    //create buffer / VBO
-    GLuint buffer = 0;
-    glGenBuffers(1, &buffer);
+        //create buffer / VBO
+        GLuint buffer = 0;
+        glGenBuffers(1, &buffer);
 
-    //send the data to the buffer
-    glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(triangleData), triangleData, GL_STATIC_DRAW);
+        //send the data to the buffer
+        glBindBuffer(GL_ARRAY_BUFFER, buffer);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(triangleData), triangleData, GL_STATIC_DRAW);
 
-    //the attribute representing position
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, nullptr);
+        //the attribute representing position
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, nullptr);
 
-    //the attribute representing color
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (void *)(sizeof(float) * 3));
+        //the attribute representing color
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (void *)(sizeof(float) * 3));
 
-#pragma endregion
+    #pragma endregion
 
-#pragma region index buffer
+    #pragma region index buffer
 
-    //create the buffer / EBO
-    GLuint indexBuffer = 0;
-    glGenBuffers(1, &indexBuffer);
+        //create the buffer / EBO
+        GLuint indexBuffer = 0;
+        glGenBuffers(1, &indexBuffer);
 
-    //send the data to the buffer
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+        //send the data to the buffer
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-#pragma endregion
+    #pragma endregion
 
     //its good practice to unbind your vao after you are done
     glBindVertexArray(0);
 
-#pragma region shader loading
+    #pragma region shader loading
 
-    Shader shader;
-    shader.loadShaderProgramFromFile(RESOURCES_PATH "myshader.vert", RESOURCES_PATH "myshader.frag");
-    shader.bind();
+        Shader shader;
+        shader.loadShaderProgramFromFile(RESOURCES_PATH "myshader.vert", RESOURCES_PATH "myshader.frag");
+        shader.bind();
 
-    GLint u_time = shader.getUniformLocation("u_time");
-    GLint u_color = shader.getUniformLocation("u_color");
+        GLint u_time = shader.getUniformLocation("u_time");
+        GLint u_color = shader.getUniformLocation("u_color");
 
-#pragma endregion
+    #pragma endregion
+
+    #pragma region texture
+
+    //loading the texture
+    int width, height, neChannels;
+    unsigned char* textureData = stbi_load(RESOURCES_PATH "img.png", &width, &height, &neChannels, 4);
+    if (!textureData) {
+        std::cerr << "Failed to load image!" << std::endl;
+        return -1;
+    }
+
+    #pragma endregion
 
     while (!glfwWindowShouldClose(window)) {
 
