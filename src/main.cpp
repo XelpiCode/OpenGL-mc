@@ -1,4 +1,3 @@
-#define GLFW_INCLUDE_NONE
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <openglErrorReporting.h>
@@ -7,6 +6,7 @@
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
+#include <glm/glm.hpp>
 
 float triangleData[] = {
     //positions
@@ -234,7 +234,7 @@ int main() {
 
 #pragma region buffer
 
-    //create buffer
+    //create buffer / VBO
     GLuint buffer = 0;
     glGenBuffers(1, &buffer);
 
@@ -254,7 +254,7 @@ int main() {
 
 #pragma region index buffer
 
-    //create the buffer
+    //create the buffer / EBO
     GLuint indexBuffer = 0;
     glGenBuffers(1, &indexBuffer);
 
@@ -287,13 +287,13 @@ int main() {
         glClearColor(0, 0, 0, 1);
         glClear(GL_COLOR_BUFFER_BIT);
 
-#pragma region imgui
+    #pragma region imgui
 
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-#pragma endregion
+    #pragma endregion
 
         ImGui::Begin("Window");
         ImGui::Text("Color test");
@@ -305,13 +305,13 @@ int main() {
 
         shader.bind();
 
-        glUniform1i(u_time, (float)(clock()) / 100.f);
+        glUniform1f(u_time, (float)(clock()) / 100.f);
         glUniform3fv(u_color, 1, color);
 
         glBindVertexArray(vao);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
 
-#pragma region imgui
+    #pragma region imgui
 
         ImGui::Render();
         int display_w = 0, display_h = 0;
@@ -319,7 +319,7 @@ int main() {
         glViewport(0, 0, display_w, display_h);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-#pragma endregion
+    #pragma endregion
 
         glfwSwapBuffers(window);
         glfwPollEvents();
