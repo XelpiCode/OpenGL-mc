@@ -12,10 +12,10 @@
 
 float triangleData[] = {
     // positions         // colors           // UV
-    0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top-right
-   -0.5f,  0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   0.0f, 1.0f, // top-left
-   -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom-left
-    0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   1.0f, 0.0f  // bottom-right
+    0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 0.0f, // top-right
+   -0.5f,  0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   0.0f, 0.0f, // top-left
+   -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 1.0f, // bottom-left
+    0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   1.0f, 1.0f  // bottom-right
 };
 
 unsigned short indices[] = {
@@ -203,7 +203,7 @@ int main() {
         return 1;
     }
 
-    GLFWwindow *window = glfwCreateWindow(640, 480, "Simple example", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(640, 480, "OpenGL mc", NULL, NULL);
     if (!window) {
         std:: cout << "Window Error!\n";
         return 1;
@@ -252,7 +252,7 @@ int main() {
 
     //the attribute representing uv
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (void *)(sizeof(float) * 2));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (void *)(sizeof(float) * 6));
 
     #pragma endregion
 
@@ -277,8 +277,7 @@ int main() {
         shader.loadShaderProgramFromFile(RESOURCES_PATH "myshader.vert", RESOURCES_PATH "myshader.frag");
         shader.bind();
 
-        GLint u_time = shader.getUniformLocation("u_time");
-        GLint u_color = shader.getUniformLocation("u_color");
+        const GLint u_time = shader.getUniformLocation("u_time");
 
     #pragma endregion
 
@@ -286,7 +285,7 @@ int main() {
 
     //loading the texture
     int width, height, neChannels;
-    unsigned char* textureData = stbi_load(RESOURCES_PATH "img.png", &width, &height, &neChannels, 4);
+    const unsigned char* textureData = stbi_load(RESOURCES_PATH "img.png", &width, &height, &neChannels, 4);
     if (!textureData) {
         std::cerr << "Failed to load image!" << std::endl;
         return -1;
@@ -295,7 +294,19 @@ int main() {
     //Generating the texture
     GLuint textureID;
     glGenTextures(1, &textureID);
+    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textureID);
+
+    //how we want our texture to scale
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    //how we want our texture to repeat
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    //sending pixels to the current texture
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, textureData);
 
     #pragma endregion
 
@@ -305,7 +316,7 @@ int main() {
         glfwGetWindowSize(window, &w, &h);
         glViewport(0, 0, w, h);
 
-        glClearColor(0, 0, 0, 1);
+        glClearColor(0.2, 0.2, 0.2, 1);
         glClear(GL_COLOR_BUFFER_BIT);
 
     #pragma region imgui
@@ -316,18 +327,23 @@ int main() {
 
     #pragma endregion
 
-        ImGui::Begin("Window");
-        ImGui::Text("Color test");
-        static float color[3] = {0.5,0.5,0.5};
-        ImGui::ColorPicker3("Color: ", color);
-        ImGui::End();
+        // ImGui::Begin("Window");
+        // ImGui::Text("Color test");
+        // static float color[3] = {0.5,0.5,0.5};
+        // ImGui::ColorPicker3("Color: ", color);
+        // ImGui::End();
 
         // ImGui::ShowDemoWindow();
 
         shader.bind();
 
         glUniform1f(u_time, (float)(clock()) / 100.f);
-        glUniform3fv(u_color, 1, color);
+        glUniform1i(shader.getUniformLocation("u_texture"), 0);
+
+        glUseProgram(shader.id);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, textureID);
 
         glBindVertexArray(vao);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
