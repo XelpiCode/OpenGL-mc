@@ -290,6 +290,11 @@ int main() {
         return -1;
     }
 
+    //Generating the texture
+    GLuint textureID;
+    glGenTextures(1, &textureID);
+    glBindTexture(GL_TEXTURE_2D, textureID);
+
     #pragma endregion
 
     while (!glfwWindowShouldClose(window)) {
