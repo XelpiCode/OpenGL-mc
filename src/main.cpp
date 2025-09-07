@@ -11,13 +11,11 @@
 #include <stb_image/stb_image.h>
 
 float triangleData[] = {
-    //positions
-    //x  y  z      colors
-    //            r  g  b
-    0.5, 0.5, 0,    1, 0, 0,    // vertex 1
-    -0.5, 0.5, 0,   0, 1, 0,    // vertex 2
-    -0.5, -0.5, 0,  0, 0, 1,    // vertex 3
-    0.5, -0.5, 0,   0, 0, 1,    // vertex 4
+    // positions         // colors           // UV
+    0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top-right
+   -0.5f,  0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   0.0f, 1.0f, // top-left
+   -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom-left
+    0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   1.0f, 0.0f  // bottom-right
 };
 
 unsigned short indices[] = {
@@ -236,21 +234,25 @@ int main() {
 
     #pragma region buffer
 
-        //create buffer / VBO
-        GLuint buffer = 0;
-        glGenBuffers(1, &buffer);
+    //create buffer / VBO
+    GLuint buffer = 0;
+    glGenBuffers(1, &buffer);
 
-        //send the data to the buffer
-        glBindBuffer(GL_ARRAY_BUFFER, buffer);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(triangleData), triangleData, GL_STATIC_DRAW);
+    //send the data to the buffer
+    glBindBuffer(GL_ARRAY_BUFFER, buffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(triangleData), triangleData, GL_STATIC_DRAW);
 
-        //the attribute representing position
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, nullptr);
+    //the attribute representing position
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, nullptr);
 
-        //the attribute representing color
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (void *)(sizeof(float) * 3));
+    //the attribute representing color
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (void *)(sizeof(float) * 3));
+
+    //the attribute representing uv
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (void *)(sizeof(float) * 2));
 
     #pragma endregion
 
@@ -320,7 +322,7 @@ int main() {
         ImGui::ColorPicker3("Color: ", color);
         ImGui::End();
 
-        ImGui::ShowDemoWindow();
+        // ImGui::ShowDemoWindow();
 
         shader.bind();
 
