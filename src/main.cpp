@@ -6,22 +6,50 @@
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image/stb_image.h>
 
-float triangleData[] = {
-    // positions         // colors           // UV
-    0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 0.0f, // top-right
-   -0.5f,  0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   0.0f, 0.0f, // top-left
-   -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 1.0f, // bottom-left
-    0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   1.0f, 1.0f  // bottom-right
+#pragma region CubeVertexData
+
+float CubeVertexData[] = {
+    // positions         // colors          // UV
+    -0.5f, -0.5f, -0.5f,  1.0f, 0.0f, 0.0f,  0.0f, 0.0f, // 0 left-bottom-back
+     0.5f, -0.5f, -0.5f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f, // 1 right-bottom-back
+     0.5f,  0.5f, -0.5f,  0.0f, 0.0f, 1.0f,  1.0f, 1.0f, // 2 right-top-back
+    -0.5f,  0.5f, -0.5f,  1.0f, 1.0f, 0.0f,  0.0f, 1.0f, // 3 left-top-back
+
+    -0.5f, -0.5f,  0.5f,  1.0f, 0.0f, 1.0f,  0.0f, 0.0f, // 4 left-bottom-front
+     0.5f, -0.5f,  0.5f,  0.0f, 1.0f, 1.0f,  1.0f, 0.0f, // 5 right-bottom-front
+     0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 1.0f,  1.0f, 1.0f, // 6 right-top-front
+    -0.5f,  0.5f,  0.5f,  0.5f, 0.5f, 0.5f,  0.0f, 1.0f  // 7 left-top-front
 };
 
 unsigned short indices[] = {
-    0,1,2, //first triangle
-    0,2,3 //second triangle
+    // Back face
+    0, 1, 2,
+    2, 3, 0,
+    // Front face
+    4, 5, 6,
+    6, 7, 4,
+    // Left face
+    0, 3, 7,
+    7, 4, 0,
+    // Right face
+    1, 5, 6,
+    6, 2, 1,
+    // Bottom face
+    0, 1, 5,
+    5, 4, 0,
+    // Top face
+    3, 2, 6,
+    6, 7, 3
 };
+
+#pragma endregion
 
 struct Shader {
 
@@ -240,7 +268,7 @@ int main() {
 
     //send the data to the buffer
     glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(triangleData), triangleData, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(CubeVertexData), CubeVertexData, GL_STATIC_DRAW);
 
     //the attribute representing position
     glEnableVertexAttribArray(0);
@@ -284,6 +312,7 @@ int main() {
     #pragma region texture
 
     //loading the texture
+    stbi_set_flip_vertically_on_load(true);
     int width, height, neChannels;
     const unsigned char* textureData = stbi_load(RESOURCES_PATH "img.png", &width, &height, &neChannels, 4);
     if (!textureData) {
@@ -315,10 +344,22 @@ int main() {
         //inputs
         glfwPollEvents();
 
+        //keyboard inputs
         if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) std::cout << "W pressed" << std::endl;
         if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) std::cout << "A pressed" << std::endl;
         if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) std::cout << "S pressed" << std::endl;
         if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) std::cout << "D pressed" << std::endl;
+        if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) std::cout << "left shift pressed" << std::endl;
+
+
+        //mouse inputs
+        if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT ) == GLFW_PRESS) {
+            std::cout << "LMB clicked" << std::endl;
+        }
+        if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT ) == GLFW_PRESS) {
+            std::cout << "RMB clicked" << std::endl;
+        }
+
 
         int w = 0 , h = 0;
         glfwGetWindowSize(window, &w, &h);
