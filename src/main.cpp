@@ -226,12 +226,15 @@ void Shader::clear() const {
 
 int main() {
 
+    int windowWidth = 640;
+    int windowHeight = 480;
+
     if (!glfwInit()) {
         std:: cout << "GLFW Init Error!\n";
         return 1;
     }
 
-    GLFWwindow *window = glfwCreateWindow(640, 480, "OpenGL mc", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(windowWidth, windowHeight, "OpenGL mc", NULL, NULL);
     if (!window) {
         std:: cout << "Window Error!\n";
         return 1;
@@ -244,19 +247,40 @@ int main() {
 
     enableReportGlErrors();
 
+    #pragma region GLM matrices
+
+    glm::vec3 cameraPosition(0.0f, 0.0f, 3.0f);
+    glm::vec3 cameraFront(0.0f, 0.0f, -1.0f);
+    glm::vec3 cameraUp(0.0f, 1.0f, 0.0f);
+
+    glm::mat4 projection = glm::perspective(
+        glm::radians(45.0f),
+        (float)windowWidth / (float)windowHeight,
+        0.1f,
+        100.0f
+    );
+
+    glm::mat4 view = glm::lookAt(
+        cameraPosition,
+        cameraPosition + cameraFront,
+        cameraUp
+    );
+
+    #pragma endregion
+
     #pragma region imgui
 
-        ImGui::CreateContext();
-        ImGui_ImplGlfw_InitForOpenGL(window, true);
-        ImGui_ImplOpenGL3_Init("#version 330");
+    ImGui::CreateContext();
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init("#version 330");
 
     #pragma endregion
 
     #pragma region vao
 
-        GLuint vao = 0;
-        glGenVertexArrays(1, &vao);
-        glBindVertexArray(vao);
+    GLuint vao = 0;
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
 
     #pragma endregion
 
