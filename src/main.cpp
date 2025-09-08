@@ -312,6 +312,14 @@ int main() {
 
     while (!glfwWindowShouldClose(window)) {
 
+        //inputs
+        glfwPollEvents();
+
+        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) std::cout << "W pressed" << std::endl;
+        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) std::cout << "A pressed" << std::endl;
+        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) std::cout << "S pressed" << std::endl;
+        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) std::cout << "D pressed" << std::endl;
+
         int w = 0 , h = 0;
         glfwGetWindowSize(window, &w, &h);
         glViewport(0, 0, w, h);
@@ -319,13 +327,13 @@ int main() {
         glClearColor(0.2, 0.2, 0.2, 1);
         glClear(GL_COLOR_BUFFER_BIT);
 
-    #pragma region imgui
+        #pragma region imgui
 
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-    #pragma endregion
+        #pragma endregion
 
         // ImGui::Begin("Window");
         // ImGui::Text("Color test");
@@ -348,7 +356,7 @@ int main() {
         glBindVertexArray(vao);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
 
-    #pragma region imgui
+        #pragma region imgui
 
         ImGui::Render();
         int display_w = 0, display_h = 0;
@@ -356,10 +364,10 @@ int main() {
         glViewport(0, 0, display_w, display_h);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-    #pragma endregion
+        #pragma endregion
 
         glfwSwapBuffers(window);
-        glfwPollEvents();
+
     }
 
     glDeleteBuffers(1, &buffer);
